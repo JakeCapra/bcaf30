@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo} from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import { Box } from '@material-ui/core';
 import { Input, Header, Messages } from './index';
@@ -21,41 +21,32 @@ const useStyles = makeStyles(() => ({
 
 const ActiveChat = ({
   user,
-  conversations,
   activeConversation,
   postMessage,
 }) => {
   const classes = useStyles();
 
-  const conversation = conversations
-    ? conversations.find(
-        (conversation) => conversation.otherUser.username === activeConversation
-      )
-    : {};
-
-  const isConversation = (obj) => {
-    return obj !== {} && obj !== undefined;
-  };
+  const isConversation = useMemo(() => activeConversation !== {} && activeConversation !== null, [activeConversation]);
 
   return (
     <Box className={classes.root}>
-      {isConversation(conversation) && conversation.otherUser && (
+      {isConversation && activeConversation.otherUser && (
         <>
           <Header
-            username={conversation.otherUser.username}
-            online={conversation.otherUser.online || false}
+            username={activeConversation.otherUser.username}
+            online={activeConversation.otherUser.online || false}
           />
           <Box className={classes.chatContainer}>
             {user && (
               <>
                 <Messages
-                  messages={conversation.messages}
-                  otherUser={conversation.otherUser}
+                  messages={activeConversation.messages}
+                  otherUser={activeConversation.otherUser}
                   userId={user.id}
                 />
                 <Input
-                  otherUser={conversation.otherUser}
-                  conversationId={conversation.id || null}
+                  otherUser={activeConversation.otherUser}
+                  conversationId={activeConversation.id || null}
                   user={user}
                   postMessage={postMessage}
                 />

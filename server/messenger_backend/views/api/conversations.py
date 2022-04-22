@@ -2,7 +2,7 @@ from django.contrib.auth.middleware import get_user
 from django.db.models import Max, Q
 from django.db.models.query import Prefetch
 from django.http import HttpResponse, JsonResponse
-from messenger_backend.models import Conversation, Message
+from messenger_backend.models import Conversation, Message, ReadStatus
 from online_users import online_users
 from rest_framework.views import APIView
 from rest_framework.request import Request
@@ -40,6 +40,17 @@ class Conversations(APIView):
                         for message in convo.messages.order_by("createdAt").all()
                     ],
                 }
+                
+                # Getting the readStatus object for this converstation and user
+                read_status = ReadStatus.objects.filter(Q(conversation=convo.id) & Q(userId=user.id)).first()
+                
+                read_status_query = convo.messages.filter(~Q(senderId=user_id))
+                if (read_status.lastReadMessage == None):
+                    # Default behavior. Only needed for pre-populated data
+                    convo_dict["unreadMessages"] = len(read_status_query.all())
+                else:
+                    convo_dict["unreadMessages"] = len(read_status_query.filter(createdAt__gt=read_status.readAt).all())
+                    
 
                 # set properties for notification count and latest message preview
                 convo_dict["latestMessageText"] = convo_dict["messages"][-1]["text"]
@@ -56,6 +67,10 @@ class Conversations(APIView):
                     convo_dict["otherUser"]["online"] = True
                 else:
                     convo_dict["otherUser"]["online"] = False
+                    
+                other_user_read_status = ReadStatus.objects.filter(Q(conversation=convo.id) & Q(userId=convo_dict["otherUser"]["id"])).first()
+                if other_user_read_status.lastReadMessage:
+                    convo_dict["otherUser"]["lastReadMessageId"] = other_user_read_status.lastReadMessage.id
 
                 conversations_response.append(convo_dict)
             conversations_response.sort(

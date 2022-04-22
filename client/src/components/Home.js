@@ -45,6 +45,10 @@ const Home = ({ user, logout }) => {
     setConversations(newState);
   };
 
+  const markAsRead = async (conversationId) => {
+    axios.post(`/api/readStatus/${conversationId}`);
+  }
+
   const clearSearchedUsers = () => {
     setConversations((prev) => prev.filter((convo) => convo.id));
   };
@@ -108,6 +112,7 @@ const Home = ({ user, logout }) => {
           messages: [message],
         };
         newConvo.latestMessageText = message.text;
+        newConvo.unreadMessages = 1;
         setConversations((prev) => [newConvo, ...prev]);
       }
 
@@ -127,8 +132,8 @@ const Home = ({ user, logout }) => {
     [setConversations],
   );
 
-  const setActiveChat = (username) => {
-    setActiveConversation(username);
+  const setActiveChat = (conversation) => {
+    setActiveConversation(conversation);
   };
 
   const addOnlineUser = useCallback((id) => {
@@ -203,6 +208,20 @@ const Home = ({ user, logout }) => {
     }
   }, [user]);
 
+  useEffect(() => {
+    if (activeConversation === null) return;
+    if (activeConversation.unreadMessages === 0) return;
+
+    markAsRead(activeConversation.id);
+
+    const prevConversation = [...conversations];
+    prevConversation.forEach((convo) => {
+      if (convo.id === activeConversation.id) convo.unreadMessages = 0
+    })
+
+    setConversations(prevConversation);
+  }, [activeConversation, socket, user.id])
+
   const handleLogout = async () => {
     if (user && user.id) {
       await logout(user.id);
@@ -223,7 +242,6 @@ const Home = ({ user, logout }) => {
         />
         <ActiveChat
           activeConversation={activeConversation}
-          conversations={conversations}
           user={user}
           postMessage={postMessage}
         />

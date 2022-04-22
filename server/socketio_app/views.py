@@ -30,7 +30,6 @@ def new_message(sid, message):
         skip_sid=sid,
     )
 
-
 @sio.on("logout")
 def logout(sid, user_id):
     if user_id in online_users:
