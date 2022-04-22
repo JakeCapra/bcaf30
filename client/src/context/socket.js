@@ -2,9 +2,7 @@ import { io } from 'socket.io-client';
 
 import React from 'react';
 
-const serverEndpoint = "http://localhost:8000";
-
-export const socket = io(serverEndpoint);
+export const socket = io(window.location.origin);
 socket.on('connect', () => {
   console.log('connected to server');
 });
