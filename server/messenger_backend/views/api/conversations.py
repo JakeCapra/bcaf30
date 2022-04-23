@@ -30,7 +30,6 @@ class Conversations(APIView):
                 )
                 .all()
             )
-
             conversations_response = []
 
             for convo in conversations:
@@ -38,12 +37,12 @@ class Conversations(APIView):
                     "id": convo.id,
                     "messages": [
                         message.to_dict(["id", "text", "senderId", "createdAt"])
-                        for message in convo.messages.all()
+                        for message in convo.messages.order_by("createdAt").all()
                     ],
                 }
 
                 # set properties for notification count and latest message preview
-                convo_dict["latestMessageText"] = convo_dict["messages"][0]["text"]
+                convo_dict["latestMessageText"] = convo_dict["messages"][-1]["text"]
 
                 # set a property "otherUser" so that frontend will have easier access
                 user_fields = ["id", "username", "photoUrl"]
@@ -60,7 +59,7 @@ class Conversations(APIView):
 
                 conversations_response.append(convo_dict)
             conversations_response.sort(
-                key=lambda convo: convo["messages"][0]["createdAt"],
+                key=lambda convo: convo["messages"][-1]["createdAt"],
                 reverse=True,
             )
             return JsonResponse(
