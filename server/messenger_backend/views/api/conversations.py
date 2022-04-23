@@ -68,10 +68,11 @@ class Conversations(APIView):
                 else:
                     convo_dict["otherUser"]["online"] = False
                     
+                convo_dict["otherUser"]["lastReadMessageId"] = None
                 other_user_read_status = ReadStatus.objects.filter(Q(conversation=convo.id) & Q(userId=convo_dict["otherUser"]["id"])).first()
                 if other_user_read_status.lastReadMessage:
                     convo_dict["otherUser"]["lastReadMessageId"] = other_user_read_status.lastReadMessage.id
-
+    
                 conversations_response.append(convo_dict)
             conversations_response.sort(
                 key=lambda convo: convo["messages"][-1]["createdAt"],

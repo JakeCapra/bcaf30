@@ -1,16 +1,15 @@
 from django.db import models
 from django.db.models import Q
-from django.dispatch import receiver
-from django.db.models.signals import post_save
-
 
 from . import utils
 from .user import User
 
+
 class Conversation(utils.CustomModel):
+
     user1 = models.ForeignKey(
         User, on_delete=models.CASCADE, db_column="user1Id", related_name="+"
-    )   
+    )
     user2 = models.ForeignKey(
         User, on_delete=models.CASCADE, db_column="user2Id", related_name="+", 
     )
@@ -27,12 +26,3 @@ class Conversation(utils.CustomModel):
             )
         except Conversation.DoesNotExist:
             return None
-
-from .readStatus import ReadStatus        
-
-@receiver(post_save, sender=Conversation)
-def addUnread(sender, instance, **kwargs):
-    user1ReadStatus = ReadStatus(userId=instance.user1, conversation=instance)
-    user1ReadStatus.save()
-    user2ReadStatus = ReadStatus(userId=instance.user2, conversation=instance)
-    user2ReadStatus.save()

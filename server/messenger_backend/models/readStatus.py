@@ -1,7 +1,8 @@
 from django.utils import timezone
 from django.db import models
 from django.db.models import Q
-
+from django.dispatch import receiver
+from django.db.models.signals import post_save
 
 from . import utils
 from .user import User
@@ -38,3 +39,10 @@ class ReadStatus(utils.CustomModel):
         readStatus.readAt = timezone.now()
         
         readStatus.save()
+        
+    @receiver(post_save, sender=Conversation)
+    def addUnread(sender, instance, **kwargs):
+        user1ReadStatus = ReadStatus(userId=instance.user1, conversation=instance)
+        user1ReadStatus.save()
+        user2ReadStatus = ReadStatus(userId=instance.user2, conversation=instance)
+        user2ReadStatus.save()

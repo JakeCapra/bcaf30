@@ -45,10 +45,6 @@ const Home = ({ user, logout }) => {
     setConversations(newState);
   };
 
-  const markAsRead = async (conversationId) => {
-    axios.post(`/api/readStatus/${conversationId}`);
-  }
-
   const clearSearchedUsers = () => {
     setConversations((prev) => prev.filter((convo) => convo.id));
   };
@@ -132,9 +128,30 @@ const Home = ({ user, logout }) => {
     [setConversations],
   );
 
-  const setActiveChat = (conversation) => {
-    setActiveConversation(conversation);
+  const setActiveChat = (username) => {
+    setActiveConversation(username);
   };
+
+  const markAsRead = useCallback((id) => {
+    axios.post(`/api/readStatus/${id}`);
+  }, [])
+
+
+  useEffect(() => {
+    if (activeConversation === null) return;
+    setConversations((prev) =>
+      prev.map((convo) => {
+        if (convo.otherUser.username === activeConversation) {
+          const convoCopy = { ...convo };
+          convoCopy.unreadMessages = 0;
+          markAsRead(convoCopy.id);
+          return convoCopy;
+        } else {
+          return convo;
+        }
+      }),
+    );
+  }, [activeConversation, setConversations, markAsRead])
 
   const addOnlineUser = useCallback((id) => {
     setConversations((prev) =>
@@ -208,20 +225,6 @@ const Home = ({ user, logout }) => {
     }
   }, [user]);
 
-  useEffect(() => {
-    if (activeConversation === null) return;
-    if (activeConversation.unreadMessages === 0) return;
-
-    markAsRead(activeConversation.id);
-
-    const prevConversation = [...conversations];
-    prevConversation.forEach((convo) => {
-      if (convo.id === activeConversation.id) convo.unreadMessages = 0
-    })
-
-    setConversations(prevConversation);
-  }, [activeConversation, socket, user.id])
-
   const handleLogout = async () => {
     if (user && user.id) {
       await logout(user.id);
@@ -242,6 +245,7 @@ const Home = ({ user, logout }) => {
         />
         <ActiveChat
           activeConversation={activeConversation}
+          conversations={conversations}
           user={user}
           postMessage={postMessage}
         />
