@@ -46,7 +46,6 @@ class Conversations(APIView):
                 
                 read_status_query = convo.messages.filter(~Q(senderId=user_id))
                 if (read_status.lastReadMessage == None):
-                    # Default behavior. Only needed for pre-populated data
                     convo_dict["unreadMessages"] = len(read_status_query.all())
                 else:
                     convo_dict["unreadMessages"] = len(read_status_query.filter(createdAt__gt=read_status.readAt).all())
