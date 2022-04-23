@@ -144,7 +144,7 @@ const Home = ({ user, logout }) => {
         if (convo.otherUser.username === activeConversation) {
           const convoCopy = { ...convo };
           convoCopy.unreadMessages = 0;
-          markAsRead(convoCopy.id);
+          if (convoCopy.id !== undefined) markAsRead(convoCopy.id);
           return convoCopy;
         } else {
           return convo;
