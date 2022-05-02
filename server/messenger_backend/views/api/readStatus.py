@@ -7,7 +7,7 @@ from rest_framework.views import APIView
 class ReadStatuses(APIView):
     """Mark all messages in the conversation as read"""
 
-    def post(self, request, conversationId):
+    def put(self, request, conversationId):
         try:
             user = get_user(request)
             
@@ -16,7 +16,6 @@ class ReadStatuses(APIView):
             
             ReadStatus.markAsRead(conversation=conversationId, user=user)
             
-            return HttpResponse(status=200)
+            return HttpResponse(status=204)
         except Exception as e:
-            print(str(e))
             return HttpResponse(status=500)

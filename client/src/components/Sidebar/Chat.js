@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Chip } from '@material-ui/core';
+import { Box, Badge } from '@material-ui/core';
 import { BadgeAvatar, ChatContent } from '../Sidebar';
 import { makeStyles } from '@material-ui/core/styles';
 
@@ -34,7 +34,7 @@ const Chat = ({ conversation, setActiveChat }) => {
         sidebar={true}
       />
       <ChatContent conversation={conversation} />
-      {conversation.unreadMessages > 0 && <Chip color="primary" label={conversation.unreadMessages} />}
+      {conversation.unreadMessages > 0 && <Badge color="primary" badgeContent={conversation.unreadMessages} />}
     </Box>
   );
 };

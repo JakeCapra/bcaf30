@@ -118,6 +118,11 @@ const Home = ({ user, logout }) => {
             const convoCopy = { ...convo };
             convoCopy.messages = [...convoCopy.messages, message];
             convoCopy.latestMessageText = message.text;
+            if (data.message.senderId !== user.id && convoCopy.otherUser.username !== activeConversation) {
+              convoCopy.unreadMessages += 1;
+            } else {
+              markAsRead(convoCopy.id);
+            }
             return convoCopy;
           } else {
             return convo;
@@ -125,15 +130,34 @@ const Home = ({ user, logout }) => {
         })
       )
     },
-    [setConversations],
+    [setConversations, activeConversation],
   );
+
+  const readMessage = useCallback(
+    (conversationId) => {
+      setConversations((prev) =>
+        prev.map((convo) => {
+          if (convo.id === conversationId) {
+            const convoCopy = { ...convo };
+            const latestMessage = convoCopy.messages.slice(0).reverse().find(msg => msg.senderId === user.id);
+            convoCopy.otherUser.lastReadMessageId = latestMessage.id;
+            return convoCopy;
+          } else {
+            return convo;
+          }
+        })
+      )
+    },
+    []
+  )
 
   const setActiveChat = (username) => {
     setActiveConversation(username);
   };
 
   const markAsRead = useCallback((id) => {
-    axios.post(`/api/readStatus/${id}`);
+    axios.put(`/api/read-status/${id}`);
+    socket.emit("mark-read", id)
   }, [])
 
 
@@ -188,6 +212,7 @@ const Home = ({ user, logout }) => {
     socket.on("add-online-user", addOnlineUser);
     socket.on("remove-offline-user", removeOfflineUser);
     socket.on("new-message", addMessageToConversation);
+    socket.on("read-message", readMessage);
 
     return () => {
       // before the component is destroyed
@@ -195,8 +220,10 @@ const Home = ({ user, logout }) => {
       socket.off("add-online-user", addOnlineUser);
       socket.off("remove-offline-user", removeOfflineUser);
       socket.off("new-message", addMessageToConversation);
+      socket.off("read-message", readMessage);
+
     };
-  }, [addMessageToConversation, addOnlineUser, removeOfflineUser, socket]);
+  }, [addMessageToConversation, addOnlineUser, removeOfflineUser, readMessage, socket]);
 
   useEffect(() => {
     // when fetching, prevent redirect
