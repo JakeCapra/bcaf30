@@ -7,12 +7,13 @@ from django.db.models.signals import post_save
 from . import utils
 from .user import User
 from .conversation import Conversation
+from .conversationUser import ConversationUser
 from .message import Message
 
 
 class ReadStatus(utils.CustomModel):
     userId = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="+"
+        ConversationUser, on_delete=models.CASCADE, related_name="+"
     )   
     conversation = models.ForeignKey(
         Conversation,

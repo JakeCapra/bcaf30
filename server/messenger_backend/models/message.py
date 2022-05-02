@@ -6,7 +6,7 @@ from .conversation import Conversation
 
 class Message(utils.CustomModel):
     text = models.TextField(null=False)
-    senderId = models.IntegerField(null=False)
+    conversationUserId = models.IntegerField(null=False)
     conversation = models.ForeignKey(
         Conversation,
         on_delete=models.CASCADE,
