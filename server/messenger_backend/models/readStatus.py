@@ -12,7 +12,7 @@ from .message import Message
 
 class ReadStatus(utils.CustomModel):
     userId = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="+"
+        User, on_delete=models.CASCADE, related_name="+",
     )   
     conversation = models.ForeignKey(
         Conversation,
