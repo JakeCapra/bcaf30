@@ -1,6 +1,6 @@
 from django.contrib.auth.middleware import get_user
 from django.http import HttpResponse
-from messenger_backend.models import ReadStatus
+from messenger_backend.models import ReadStatus, Conversation
 from rest_framework.views import APIView
 
 
@@ -13,6 +13,10 @@ class ReadStatuses(APIView):
             
             if user.is_anonymous:
                 return HttpResponse(status=401)
+            
+            conversation = Conversation.objects.filter(id=conversationId).first()
+            if conversation.user1_id != user.id and conversation.user2_id != user.id:
+                return HttpResponse(status=403)
             
             ReadStatus.markAsRead(conversation=conversationId, user=user)
             
