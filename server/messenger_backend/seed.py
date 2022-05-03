@@ -1,5 +1,5 @@
 from django.db import migrations
-from messenger_backend.models import User, Conversation, Message
+from messenger_backend.models import User, Conversation, Message, ReadStatus
 
 
 def seed():
@@ -7,6 +7,8 @@ def seed():
     User.objects.all().delete()
     Conversation.objects.all().delete()
     Message.objects.all().delete()
+    ReadStatus.objects.all().delete()
+    
 
     thomas = User(
         username="thomas",
