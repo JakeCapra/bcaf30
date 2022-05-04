@@ -2,11 +2,14 @@ from django.db import models
 
 from . import utils
 from .conversation import Conversation
+from .conversationUser import ConversationUser
 
 
 class Message(utils.CustomModel):
     text = models.TextField(null=False)
-    senderId = models.IntegerField(null=False)
+    conversationUser = models.ForeignKey(
+        ConversationUser, on_delete=models.CASCADE, db_column="conversationUserId", related_name="+"
+    )
     conversation = models.ForeignKey(
         Conversation,
         on_delete=models.CASCADE,
